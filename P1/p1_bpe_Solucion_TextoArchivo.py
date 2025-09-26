@@ -177,7 +177,9 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Uso:")
         print("  python p1_bpe.py train <input_train_corpus> <output_model_file> [vocab_size]")
+        # Hemos usado python p1_bpe.py train tiny_cc_news.txt modelo_prueba.pkl 500 (Defautl vocab_size=1000)
         print("  python p1_bpe.py eval <input_model_file> <input_text>")
+        # Hemos usado python p1_bpe.py eval modelo_prueba.pkl 
         sys.exit(1)
     
     command = sys.argv[1]
@@ -220,15 +222,24 @@ if __name__ == "__main__":
             sys.exit(1)
             
         model_file = sys.argv[2]
-        input_text = sys.argv[3]
+        input_arg = sys.argv[3]
         
         try:
             # Cargar el modelo
             with open(model_file, 'rb') as f:
                 bpe = pickle.load(f)
             
-            # Evaluar
-            print(f"Texto original: {input_text}")
+            # Detectar si el argumento es un archivo .txt
+            import os
+            if os.path.isfile(input_arg):
+                with open(input_arg, 'r', encoding='utf-8') as f:
+                    input_text = f.read()
+                print(f"Texto cargado desde archivo {input_arg}")
+            else:
+                input_text = input_arg
+                print("Texto tomado directamente de consola")
+            # Mostrar archivo de entrada
+            print(f"Archivo de entrada: {input_arg}")
             
             # Tokenizar
             tokens = bpe.tokenize(input_text)
@@ -240,21 +251,21 @@ if __name__ == "__main__":
             
             # Decodificar
             decoded = bpe.decode(encoded)
-            print(f"Texto decodificado: {decoded}")
+            #print(f"Texto decodificado: {decoded}")
             
             # Verificar que la codificación/decodificación es correcta
             if input_text == decoded:
-                print("✓ Codificación/decodificación correcta")
+                print("Codificación/decodificación correcta")
             else:
-                print("✗ Error en codificación/decodificación")
+                print("Error en codificación/decodificación")
             
         except FileNotFoundError:
-            print(f"Error: No se pudo encontrar el archivo {model_file}")
+            print(f"Error: No se pudo encontrar el archivo {model_file} o {input_arg}")
             sys.exit(1)
         except Exception as e:
             print(f"Error durante la evaluación: {e}")
             sys.exit(1)
-    
+
     else:
         print(f"Comando desconocido: {command}")
         print("Comandos válidos: train, eval")
